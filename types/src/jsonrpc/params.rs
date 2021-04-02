@@ -78,6 +78,7 @@ impl From<Params> for JsonValue {
 mod tests {
 	use super::Params;
 	use crate::jsonrpc::{Error, ErrorCode, JsonValue};
+	use alloc::{string::String, vec};
 
 	#[test]
 	fn params_deserialization() {

@@ -117,6 +117,7 @@ impl fmt::Display for Request {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use alloc::vec;
 	use serde_json::Value;
 
 	#[test]

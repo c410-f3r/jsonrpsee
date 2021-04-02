@@ -202,6 +202,7 @@ impl SubscriptionId {
 #[cfg(test)]
 mod tests {
 	use super::{Error, Failure, Id, Output, Response, Success, Version};
+	use alloc::vec;
 	use serde_json::Value;
 
 	#[test]

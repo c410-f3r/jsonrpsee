@@ -1,15 +1,32 @@
-use thiserror::Error;
+use core::fmt;
 
 /// Error.
-#[derive(Error, Debug)]
 pub enum RpcError {
 	/// Unknown error.
-	#[error("unknown rpc error")]
 	Unknown,
 	/// Invalid params in the RPC call.
-	#[error("invalid params")]
 	InvalidParams,
 }
+
+impl fmt::Debug for RpcError {
+	#[inline]
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match *self {
+			Self::Unknown => write!(f, "unknown rpc error"),
+			Self::InvalidParams => write!(f, "invalid paramsr"),
+		}
+	}
+}
+
+impl fmt::Display for RpcError {
+	#[inline]
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		fmt::Debug::fmt(self, f)
+	}
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for RpcError {}
 
 /// Parse error code.
 pub const PARSE_ERROR_CODE: i32 = -32700;

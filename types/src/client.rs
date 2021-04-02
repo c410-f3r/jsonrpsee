@@ -1,5 +1,6 @@
 use crate::error::Error;
 use crate::jsonrpc::{self, DeserializeOwned, JsonValue, Params, SubscriptionId};
+use alloc::{string::String, vec::Vec};
 use core::marker::PhantomData;
 use futures::channel::{mpsc, oneshot};
 use futures::prelude::*;
@@ -107,7 +108,7 @@ impl<Notif> Drop for Subscription<Notif> {
 		// the channel's buffer will be full, and our unsubscription request will never make it.
 		// However, when a notification arrives, the background task will realize that the channel
 		// to the `Subscription` has been closed, and will perform the unsubscribe.
-		let id = std::mem::replace(&mut self.id, SubscriptionId::Num(0));
+		let id = core::mem::replace(&mut self.id, SubscriptionId::Num(0));
 		let _ = self.to_back.send(FrontToBack::SubscriptionClosed(id)).now_or_never();
 	}
 }

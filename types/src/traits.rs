@@ -1,7 +1,7 @@
 use crate::client::Subscription;
 use crate::error::Error;
 use crate::jsonrpc::{DeserializeOwned, Params};
-use alloc::string::String;
+use alloc::{boxed::Box, string::String, vec::Vec};
 use async_trait::async_trait;
 
 /// [JSON-RPC](https://www.jsonrpc.org/specification) client interface that can make requests and notifications.

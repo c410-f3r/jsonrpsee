@@ -137,7 +137,7 @@ pub struct Iter<'a>(IterInner<'a>);
 enum IterInner<'a> {
 	Empty,
 	Map(serde_json::map::Iter<'a>),
-	Array(std::slice::Iter<'a, serde_json::Value>),
+	Array(core::slice::Iter<'a, serde_json::Value>),
 }
 
 #[derive(Debug)]

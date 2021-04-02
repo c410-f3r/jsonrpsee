@@ -1,5 +1,7 @@
 use crate::jsonrpc;
-use std::fmt;
+use alloc::{boxed::Box, string::String};
+use core::fmt;
+
 /// Convenience type for displaying errors.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Mismatch<T> {
@@ -16,62 +18,108 @@ impl<T: fmt::Display> fmt::Display for Mismatch<T> {
 }
 
 /// Error type.
-#[derive(Debug, thiserror::Error)]
 pub enum Error {
 	/// Networking error or error on the low-level protocol layer.
-	#[error("Networking or low-level protocol error: {0}")]
-	TransportError(#[source] Box<dyn std::error::Error + Send + Sync>),
+	TransportError(Box<dyn std::error::Error + Send + Sync>),
 	/// JSON-RPC request error.
-	#[error("JSON-RPC request error: {0:?}")]
-	Request(#[source] jsonrpc::Error),
+	Request(jsonrpc::Error),
 	/// Subscription error.
-	#[error("Subscription failed, subscribe_method: {0} unsubscribe_method: {1}")]
 	Subscription(String, String),
 	/// Frontend/backend channel error.
-	#[error("Frontend/backend channel error: {0}")]
-	Internal(#[source] futures::channel::mpsc::SendError),
+	Internal(futures::channel::mpsc::SendError),
 	/// Invalid response,
-	#[error("Invalid response: {0}")]
 	InvalidResponse(Mismatch<String>),
 	/// The background task has been terminated.
-	#[error("The background task been terminated because: {0}; restart required")]
 	RestartNeeded(String),
 	/// Failed to parse the data that the server sent back to us.
-	#[error("Parse error: {0}")]
-	ParseError(#[source] jsonrpc::ParseError),
+	ParseError(jsonrpc::ParseError),
 	/// Invalid subscription ID.
-	#[error("Invalid subscription ID")]
 	InvalidSubscriptionId,
 	/// Invalid request ID.
-	#[error("Invalid request ID")]
 	InvalidRequestId,
 	/// A request with the same request ID has already been registered.
-	#[error("A request with the same request ID has already been registered")]
 	DuplicateRequestId,
 	/// Method was already registered.
-	#[error("Method: {0} was already registered")]
 	MethodAlreadyRegistered(String),
 	/// Subscribe and unsubscribe method names are the same.
-	#[error("Cannot use the same method name for subscribe and unsubscribe, used: {0}")]
 	SubscriptionNameConflict(String),
 	/// Websocket request timeout
-	#[error("Websocket request timeout")]
 	WsRequestTimeout,
 	/// Configured max number of request slots exceeded.
-	#[error("Configured max number of request slots exceeded")]
 	MaxSlotsExceeded,
 	/// Custom error.
-	#[error("Custom error: {0}")]
 	Custom(String),
 }
 
+impl fmt::Debug for Error {
+	#[inline]
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match *self {
+			Self::TransportError(ref elem) => write!(f, "Networking or low-level protocol error: {}", elem),
+			Self::Request(ref elem) => write!(f, "JSON-RPC request error: {}", elem),
+			Self::Subscription(ref elem0, ref elem1) => {
+				write!(f, "Subscription failed, subscribe_method: {} unsubscribe_method: {}", elem0, elem1)
+			}
+			Self::Internal(ref elem) => write!(f, "Frontend/backend channel error: {}", elem),
+			Self::InvalidResponse(ref elem) => write!(f, "Invalid response: {}", elem),
+			Self::RestartNeeded(ref elem) => {
+				write!(f, "The background task been terminated because: {}; restart required", elem)
+			}
+			Self::ParseError(ref elem) => write!(f, "Parse error: {}", elem),
+			Self::InvalidSubscriptionId => write!(f, "Invalid subscription ID"),
+			Self::InvalidRequestId => write!(f, "Invalid request ID"),
+			Self::DuplicateRequestId => write!(f, " request with the same request ID has already been registered"),
+			Self::MethodAlreadyRegistered(ref elem) => write!(f, "Method: {} was already registered", elem),
+			Self::SubscriptionNameConflict(ref elem) => {
+				write!(f, "Cannot use the same method name for subscribe and unsubscribe, used: {}", elem)
+			}
+			Self::WsRequestTimeout => write!(f, "Websocket request timeout"),
+			Self::MaxSlotsExceeded => write!(f, "Configured max number of request slots exceeded"),
+			Self::Custom(ref elem) => write!(f, "Custom error: {}", elem),
+		}
+	}
+}
+
+impl fmt::Display for Error {
+	#[inline]
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		fmt::Debug::fmt(self, f)
+	}
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
+
 /// Generic transport error.
-#[derive(Debug, thiserror::Error)]
-pub enum GenericTransportError<T: std::error::Error + Send + Sync> {
+pub enum GenericTransportError<T> {
 	/// Request was too large.
-	#[error("The request was too big")]
 	TooLarge,
 	/// Concrete transport error.
-	#[error("Transport error: {0}")]
 	Inner(T),
 }
+
+impl<T> fmt::Debug for GenericTransportError<T>
+where
+	T: fmt::Debug,
+{
+	#[inline]
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match *self {
+			Self::TooLarge => write!(f, "The request was too big"),
+			Self::Inner(ref inner) => write!(f, "Transport error: {:?}", inner),
+		}
+	}
+}
+
+impl<T> fmt::Display for GenericTransportError<T>
+where
+	T: fmt::Debug,
+{
+	#[inline]
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		fmt::Debug::fmt(self, f)
+	}
+}
+
+#[cfg(feature = "std")]
+impl<T> std::error::Error for GenericTransportError<T> where T: fmt::Debug {}

@@ -1,9 +1,9 @@
 use beef::lean::Cow;
+use core::fmt;
 use serde::de::{self, Deserializer, Unexpected, Visitor};
 use serde::ser::Serializer;
 use serde::{Deserialize, Serialize};
 use serde_json::value::RawValue;
-use std::fmt;
 
 /// Error type.
 pub mod error;

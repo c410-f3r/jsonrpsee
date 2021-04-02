@@ -2,6 +2,7 @@
 
 use super::error::RpcError;
 use super::RpcParams;
+use alloc::string::String;
 use serde_json::value::RawValue;
 
 /// RPC Call.

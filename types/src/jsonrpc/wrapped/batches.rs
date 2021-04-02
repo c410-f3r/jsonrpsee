@@ -282,6 +282,7 @@ where
 mod tests {
 	use super::{BatchesEvent, BatchesState};
 	use crate::jsonrpc::{self, wrapped::Notification};
+	use alloc::{string::String, vec, vec::Vec};
 
 	#[test]
 	fn basic_notification() {

@@ -263,6 +263,7 @@ impl<'a> fmt::Debug for BatchRequest<'a> {
 mod tests {
 	use super::{BatchInc, BatchState};
 	use crate::jsonrpc::{self, wrapped::Notification};
+	use alloc::{string::String, vec::Vec};
 
 	#[test]
 	fn basic_notification() {
